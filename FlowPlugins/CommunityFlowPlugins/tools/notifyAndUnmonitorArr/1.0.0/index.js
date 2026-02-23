@@ -15,12 +15,12 @@ exports.plugin = exports.details = void 0;
 
 /* -------------- small helpers -------------- */
 const PATH_SEP = /[\\/]/;
-const getFileName = (p)=> String(p||'').split(PATH_SEP).pop() || '';
-const getDirParts = (p)=> String(p||'').split(PATH_SEP).filter(Boolean);
-const stripTrailingSlashes = (u)=> String(u||'').replace(/\/+$/,'');
-const toBool = (v)=>{
-  if (typeof v === "boolean") return v;
-  if (typeof v === "string") return ["1","true","yes","on"].includes(v.toLowerCase());
+const getFileName = (p) => String(p || '').split(PATH_SEP).pop() || '';
+const getDirParts = (p) => String(p || '').split(PATH_SEP).filter(Boolean);
+const stripTrailingSlashes = (u) => String(u || '').replace(/\/+$/, '');
+const toBool = (v) => {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'string') return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());
   return !!v;
 };
 
@@ -32,7 +32,7 @@ function parseSxxEyyFromPath(p) {
 
 function looksLikeTvPath(p) {
   const parts = getDirParts(p);
-  if (parts.some(x => /^(?:Season|Series)\s+\d+$/i.test(x))) return true;
+  if (parts.some((x) => /^(?:Season|Series)\s+\d+$/i.test(x))) return true;
   const { season, episode } = parseSxxEyyFromPath(p);
   return season !== null && episode !== null;
 }
@@ -48,19 +48,22 @@ function getSeriesTitleFromPath(p) {
 }
 
 function tvdbIdFromPath(p) {
-  const m = String(p||'').match(/\{tvdb-(\d+)\}/i);
+  const m = String(p || '').match(/\{tvdb-(\d+)\}/i);
   return m ? Number(m[1]) : null;
 }
 
 function is4KPath(p) {
-  const s = String(p||'').toLowerCase();
+  const s = String(p || '').toLowerCase();
   return /\b(2160p|uhd|4k)\b/.test(s) || /[\s._-](uhd|4k)[\s._-]/.test(s);
 }
 
 /* -------------- plugin details -------------- */
 const details = () => ({
   name: 'AK_NotifyAndUnmonitorArr',
-  description: 'Refresh Sonarr/Radarr; optionally unmonitor item afterwards; auto HD/4K routing via path detection; no file management.',
+  description:
+    'Post-transcode plugin that refreshes Sonarr or Radarr and optionally unmonitors the item. '
+    + 'Auto-detects TV vs movie from file path and routes to the correct HD or 4K instance based '
+    + 'on path tokens (2160p/UHD/4K). Supports dual Sonarr and dual Radarr instances. No file management.',
   style: { borderColor: 'green' },
   tags: 'arr,sonarr,radarr,unmonitor,post',
   isStartPlugin: false,
@@ -69,38 +72,38 @@ const details = () => ({
   sidebarPosition: -1,
   icon: 'faBell',
   inputs: [
-    // HD / 4K endpoints (Sonarr)
-    { label:'Sonarr HD Host',    name:'sonarr_hd_host',    type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'Base URL for HD Sonarr. No trailing slash.' },
-    { label:'Sonarr HD API Key', name:'sonarr_hd_api_key', type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'X-Api-Key for HD Sonarr' },
-    { label:'Sonarr 4K Host',    name:'sonarr_4k_host',    type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'Base URL for 4K Sonarr. No trailing slash.' },
-    { label:'Sonarr 4K API Key', name:'sonarr_4k_api_key', type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'X-Api-Key for 4K Sonarr' },
+    // Sonarr endpoints
+    { label: 'Sonarr Host', name: 'sonarr_host', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: 'Base URL for Sonarr (HD). No trailing slash. e.g. http://192.168.1.1:8989' },
+    { label: 'Sonarr API Key', name: 'sonarr_api_key', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: 'X-Api-Key for Sonarr' },
+    { label: 'Sonarr 4K Host', name: 'sonarr_4k_host', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: '(Optional) Base URL for 4K Sonarr. Falls back to Sonarr Host if not set.' },
+    { label: 'Sonarr 4K API Key', name: 'sonarr_4k_api_key', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: '(Optional) X-Api-Key for 4K Sonarr. Falls back to Sonarr API Key if not set.' },
 
-    // HD / 4K endpoints (Radarr)
-    { label:'Radarr HD Host',    name:'radarr_hd_host',    type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'Base URL for HD Radarr. No trailing slash.' },
-    { label:'Radarr HD API Key', name:'radarr_hd_api_key', type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'X-Api-Key for HD Radarr' },
-    { label:'Radarr 4K Host',    name:'radarr_4k_host',    type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'Base URL for 4K Radarr. No trailing slash.' },
-    { label:'Radarr 4K API Key', name:'radarr_4k_api_key', type:'string', defaultValue:'', inputUI:{ type:'text' }, tooltip:'X-Api-Key for 4K Radarr' },
+    // Radarr endpoints
+    { label: 'Radarr Host', name: 'radarr_host', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: 'Base URL for Radarr (HD). No trailing slash. e.g. http://192.168.1.1:7878' },
+    { label: 'Radarr API Key', name: 'radarr_api_key', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: 'X-Api-Key for Radarr' },
+    { label: 'Radarr 4K Host', name: 'radarr_4k_host', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: '(Optional) Base URL for 4K Radarr. Falls back to Radarr Host if not set.' },
+    { label: 'Radarr 4K API Key', name: 'radarr_4k_api_key', type: 'string', defaultValue: '', inputUI: { type: 'text' }, tooltip: '(Optional) X-Api-Key for 4K Radarr. Falls back to Radarr API Key if not set.' },
 
-    { label:'Unmonitor after refresh', name:'unmonitor_after_refresh', type:'boolean', defaultValue:true, inputUI:{ type:'checkbox' }, tooltip:'If enabled: Radarr → unmonitor movie; Sonarr → unmonitor SxxEyy' },
-    { label:'Timeout (ms)',            name:'timeout_ms',               type:'number',  defaultValue:15000, inputUI:{ type:'number' }, tooltip:'HTTP timeout' },
+    { label: 'Unmonitor after refresh', name: 'unmonitor_after_refresh', type: 'boolean', defaultValue: true, inputUI: { type: 'checkbox' }, tooltip: 'If enabled: Radarr → unmonitor movie; Sonarr → unmonitor SxxEyy' },
+    { label: 'Timeout (ms)', name: 'timeout_ms', type: 'number', defaultValue: 15000, inputUI: { type: 'number' }, tooltip: 'HTTP timeout in milliseconds' },
   ],
   outputs: [
-    { number:1, tooltip:'Arr notified (and possibly unmonitored)' },
-    { number:2, tooltip:'Arr item not found' },
+    { number: 1, tooltip: 'Arr notified (and possibly unmonitored)' },
+    { number: 2, tooltip: 'Arr item not found' },
   ],
 });
 exports.details = details;
 
 /* -------------- HTTP helpers -------------- */
-function httpTimeout(args){ return Number(args.inputs.timeout_ms || 15000); }
+function httpTimeout(args) { return Number(args.inputs.timeout_ms || 15000); }
 async function arrPOST(args, base, path, headers, data) {
-  return args.deps.axios({ method:'post', url:`${base}${path}`, headers, data, timeout:httpTimeout(args) });
+  return args.deps.axios({ method: 'post', url: `${base}${path}`, headers, data, timeout: httpTimeout(args) });
 }
 async function arrGET(args, base, path, headers, params) {
-  return args.deps.axios({ method:'get', url:`${base}${path}`, headers, params, timeout:httpTimeout(args) });
+  return args.deps.axios({ method: 'get', url: `${base}${path}`, headers, params, timeout: httpTimeout(args) });
 }
 async function arrPUT(args, base, path, headers, data) {
-  return args.deps.axios({ method:'put', url:`${base}${path}`, headers, data, timeout:httpTimeout(args) });
+  return args.deps.axios({ method: 'put', url: `${base}${path}`, headers, data, timeout: httpTimeout(args) });
 }
 
 /* -------------- ID resolution -------------- */
@@ -108,14 +111,12 @@ const getId = async (args, arrApp, fileName) => {
   const imdbId = (/\btt\d{7,10}\b/i.exec(fileName)?.at(0)) ?? '';
   let id = -1;
 
-  // imdb lookup first
   if (imdbId) {
-    const r = await arrGET(args, arrApp.host, `/api/v3/${arrApp.name==='radarr'?'movie':'series'}/lookup`, arrApp.headers, { term:`imdb:${imdbId}` });
+    const r = await arrGET(args, arrApp.host, `/api/v3/${arrApp.name === 'radarr' ? 'movie' : 'series'}/lookup`, arrApp.headers, { term: `imdb:${imdbId}` });
     id = Number(r.data?.at(0)?.id ?? -1);
     args.jobLog(`${arrApp.content} ${id !== -1 ? `'${id}' found` : 'not found'} for imdb '${imdbId}'`);
   }
 
-  // fallback to parse
   if (id === -1) {
     const parsedName = getFileName(fileName);
     const p = await arrGET(args, arrApp.host, `/api/v3/parse`, arrApp.headers, { title: parsedName });
@@ -140,12 +141,12 @@ async function lookupSonarrSeriesId(args, base, headers, srcPath) {
 }
 
 async function unmonitorSonarrEpisode(args, base, apiKey, seriesId, season, episode) {
-  const headers = { 'X-Api-Key': apiKey, 'Content-Type':'application/json', Accept:'application/json' };
+  const headers = { 'X-Api-Key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' };
   const timeout = httpTimeout(args);
 
   const eps = await arrGET(args, base, `/api/v3/episode`, headers, { seriesId });
   const match = Array.isArray(eps.data)
-    ? eps.data.find(e => Number(e.seasonNumber) === Number(season) && Number(e.episodeNumber) === Number(episode))
+    ? eps.data.find((e) => Number(e.seasonNumber) === Number(season) && Number(e.episodeNumber) === Number(episode))
     : null;
   if (!match) {
     args.jobLog(`Sonarr: episode S${season}E${episode} not found in seriesId ${seriesId}`);
@@ -156,7 +157,7 @@ async function unmonitorSonarrEpisode(args, base, apiKey, seriesId, season, epis
     await args.deps.axios.put(
       `${base}/api/v3/episode/monitor`,
       { monitored: false, episodeIds: [match.id] },
-      { headers, timeout, params: { includeImages: false } }
+      { headers, timeout, params: { includeImages: false } },
     );
     args.jobLog(`✔ Sonarr: unmonitored S${season}E${episode} (episodeId=${match.id}) via PUT /episode/monitor`);
     return true;
@@ -169,7 +170,6 @@ async function unmonitorSonarrEpisode(args, base, apiKey, seriesId, season, epis
   const epFull = await args.deps.axios.get(`${base}/api/v3/episode/${match.id}`, { headers, timeout });
   const payload = Object.assign({}, epFull.data, { monitored: false });
   await args.deps.axios.put(`${base}/api/v3/episode`, [payload], { headers, timeout });
-
   args.jobLog(`✔ Sonarr: unmonitored S${season}E${episode} (episodeId=${match.id}) via PUT /episode`);
   return true;
 }
@@ -180,7 +180,7 @@ async function unmonitorSonarrByPath(args, base, apiKey, srcPath, seriesIdFromRe
     args.jobLog(`Sonarr: cannot unmonitor – SxxEyy not detected in "${srcPath}"`);
     return false;
   }
-  const headers = { 'X-Api-Key': apiKey, 'Content-Type':'application/json', Accept:'application/json' };
+  const headers = { 'X-Api-Key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' };
   const seriesId = (seriesIdFromRefresh && seriesIdFromRefresh !== -1)
     ? seriesIdFromRefresh
     : await lookupSonarrSeriesId(args, base, headers, srcPath);
@@ -194,35 +194,46 @@ async function unmonitorSonarrByPath(args, base, apiKey, srcPath, seriesIdFromRe
 /* -------------- Radarr helpers -------------- */
 async function unmonitorRadarr(args, base, headers, movieId) {
   const m = await arrGET(args, base, `/api/v3/movie/${movieId}`, headers);
-  const payload = Object.assign({}, m.data, { monitored:false });
+  const payload = Object.assign({}, m.data, { monitored: false });
   await arrPUT(args, base, `/api/v3/movie/${movieId}`, headers, payload);
   args.jobLog(`✔ Radarr: movie id=${movieId} unmonitored`);
 }
 
-/* -------------- app config (HD/4K) -------------- */
+/* -------------- app config (HD/4K with fallback) -------------- */
 function pickInstance(args, appName, is4k) {
   if (appName === 'sonarr') {
-    const host = stripTrailingSlashes(is4k ? args.inputs.sonarr_4k_host : args.inputs.sonarr_hd_host);
-    const key  = String(is4k ? args.inputs.sonarr_4k_api_key : args.inputs.sonarr_hd_api_key || '');
-    const headers = { 'X-Api-Key': key, 'Content-Type':'application/json', Accept:'application/json' };
+    const hdHost = stripTrailingSlashes(args.inputs.sonarr_host);
+    const hdKey = String(args.inputs.sonarr_api_key || '');
+    const host = stripTrailingSlashes(is4k
+      ? (args.inputs.sonarr_4k_host || hdHost)
+      : hdHost);
+    const key = String(is4k
+      ? (args.inputs.sonarr_4k_api_key || hdKey)
+      : hdKey);
+    const headers = { 'X-Api-Key': key, 'Content-Type': 'application/json', Accept: 'application/json' };
     return {
-      name:'sonarr', host, key, headers, content:'Serie',
-      delegates:{
-        getIdFromParseResponse: (resp)=> Number(resp?.data?.series?.id ?? -1),
-        buildRefreshRequest: (id)=> ({ name:'RefreshSeries', seriesId:id }),
-      }
+      name: 'sonarr', host, key, headers, content: 'Serie',
+      delegates: {
+        getIdFromParseResponse: (resp) => Number(resp?.data?.series?.id ?? -1),
+        buildRefreshRequest: (id) => ({ name: 'RefreshSeries', seriesId: id }),
+      },
     };
   }
-  // radarr
-  const host = stripTrailingSlashes(is4k ? args.inputs.radarr_4k_host : args.inputs.radarr_hd_host);
-  const key  = String(is4k ? args.inputs.radarr_4k_api_key : args.inputs.radarr_hd_api_key || '');
-  const headers = { 'X-Api-Key': key, 'Content-Type':'application/json', Accept:'application/json' };
+  const hdHost = stripTrailingSlashes(args.inputs.radarr_host);
+  const hdKey = String(args.inputs.radarr_api_key || '');
+  const host = stripTrailingSlashes(is4k
+    ? (args.inputs.radarr_4k_host || hdHost)
+    : hdHost);
+  const key = String(is4k
+    ? (args.inputs.radarr_4k_api_key || hdKey)
+    : hdKey);
+  const headers = { 'X-Api-Key': key, 'Content-Type': 'application/json', Accept: 'application/json' };
   return {
-    name:'radarr', host, key, headers, content:'Movie',
-    delegates:{
-      getIdFromParseResponse: (resp)=> Number(resp?.data?.movie?.id ?? -1),
-      buildRefreshRequest: (id)=> ({ name:'RefreshMovie', movieIds:[id] }),
-    }
+    name: 'radarr', host, key, headers, content: 'Movie',
+    delegates: {
+      getIdFromParseResponse: (resp) => Number(resp?.data?.movie?.id ?? -1),
+      buildRefreshRequest: (id) => ({ name: 'RefreshMovie', movieIds: [id] }),
+    },
   };
 }
 
@@ -232,19 +243,18 @@ const plugin = async (args) => {
   args.inputs = lib.loadDefaultValues(args.inputs, details);
 
   const originalFileName = args.originalLibraryFile?._id || '';
-  const currentFileName  = args.inputFileObj?._id || '';
+  const currentFileName = args.inputFileObj?._id || '';
   const srcPath = currentFileName || originalFileName || '';
 
-  const isTv  = looksLikeTvPath(srcPath);
-  const is4k  = is4KPath(srcPath);
+  const isTv = looksLikeTvPath(srcPath);
+  const is4k = is4KPath(srcPath);
   const unmonitorFlag = toBool(args.inputs.unmonitor_after_refresh);
 
-  // Auto-detect: TV path → Sonarr, everything else → Radarr
   const target = isTv ? 'sonarr' : 'radarr';
   const arrApp = pickInstance(args, target, is4k);
 
   if (!arrApp.host || !arrApp.key) {
-    throw new Error(`Missing ${arrApp.name} ${is4k ? '4K' : 'HD'} host or API key`);
+    throw new Error(`Missing ${arrApp.name} ${is4k ? '4K' : ''} host or API key`);
   }
 
   if (arrApp.name === 'sonarr' && /radarr/i.test(arrApp.host)) args.jobLog('Warning: target=sonarr but host looks like Radarr');
@@ -289,7 +299,6 @@ const plugin = async (args) => {
     }
   }
 
-  // No file management here; hand off to your Replace Original File plugin next.
   return {
     outputFileObj: args.inputFileObj,
     outputNumber: refreshed ? 1 : 2,
