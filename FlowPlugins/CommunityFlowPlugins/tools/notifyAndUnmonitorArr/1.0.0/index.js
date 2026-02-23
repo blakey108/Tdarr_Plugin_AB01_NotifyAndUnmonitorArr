@@ -1,5 +1,5 @@
 "use strict";
-/* AK_NotifyAndUnmonitorArr — HD/4K + dual Sonarr/Radarr, no file management
+/* AB_NotifyAndUnmonitorArr — HD/4K + dual Sonarr/Radarr, no file management
    - Refresh Sonarr/Radarr after transcode.
    - Optionally unmonitor the item.
    - Sonarr unmonitor: PUT /api/v3/episode/monitor?includeImages=false; on 404/405 fallback to PUT /api/v3/episode with full payload.
@@ -59,7 +59,7 @@ function is4KPath(p) {
 
 /* -------------- plugin details -------------- */
 const details = () => ({
-  name: 'AK_NotifyAndUnmonitorArr',
+  name: 'AB_NotifyAndUnmonitorArr',
   description:
     'Post-transcode plugin that refreshes Sonarr or Radarr and optionally unmonitors the item. '
     + 'Auto-detects TV vs movie from file path and routes to the correct HD or 4K instance based '
@@ -260,7 +260,7 @@ const plugin = async (args) => {
   if (arrApp.name === 'sonarr' && /radarr/i.test(arrApp.host)) args.jobLog('Warning: target=sonarr but host looks like Radarr');
   if (arrApp.name === 'radarr' && /sonarr/i.test(arrApp.host)) args.jobLog('Warning: target=radarr but host looks like Sonarr');
 
-  args.jobLog(`AK_NotifyAndUnmonitorArr start — detected: ${target.toUpperCase()} ${is4k ? '4K' : 'HD'}`);
+  args.jobLog(`AB_NotifyAndUnmonitorArr start — detected: ${target.toUpperCase()} ${is4k ? '4K' : 'HD'}`);
 
   // Refresh
   let id = -1;
