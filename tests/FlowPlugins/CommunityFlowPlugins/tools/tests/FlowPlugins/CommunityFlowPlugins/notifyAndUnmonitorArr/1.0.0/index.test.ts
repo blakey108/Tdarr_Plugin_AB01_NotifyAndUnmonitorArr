@@ -6,7 +6,7 @@ import getConfigVars from '../../../../configVars';
 
 const sampleH264 = require('../../../../../sampleData/media/sampleH264_1.json');
 
-describe('AK_NotifyAndUnmonitorArr Plugin', () => {
+describe('AB_NotifyAndUnmonitorArr Plugin', () => {
   let baseArgs: IpluginInputArgs;
 
   beforeEach(() => {
