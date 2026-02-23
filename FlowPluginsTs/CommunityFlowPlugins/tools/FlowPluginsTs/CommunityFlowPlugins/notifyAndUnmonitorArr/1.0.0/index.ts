@@ -52,7 +52,7 @@ function is4KPath(p: string): boolean {
 
 /* -------------- plugin details -------------- */
 const details = (): IpluginDetails => ({
-  name: 'AK_NotifyAndUnmonitorArr',
+  name: 'AB_NotifyAndUnmonitorArr',
   description:
     'Post-transcode plugin that refreshes Sonarr or Radarr and optionally unmonitors the item. '
     + 'Auto-detects TV vs movie from file path and routes to the correct HD or 4K instance based '
@@ -274,7 +274,7 @@ const plugin = async (args: IpluginInputArgs): Promise<IpluginOutputArgs> => {
   if (arrApp.name === 'sonarr' && /radarr/i.test(arrApp.host)) args.jobLog('Warning: target=sonarr but host looks like Radarr');
   if (arrApp.name === 'radarr' && /sonarr/i.test(arrApp.host)) args.jobLog('Warning: target=radarr but host looks like Sonarr');
 
-  args.jobLog(`AK_NotifyAndUnmonitorArr start — detected: ${target.toUpperCase()} ${is4k ? '4K' : 'HD'}`);
+  args.jobLog(`AB_NotifyAndUnmonitorArr start — detected: ${target.toUpperCase()} ${is4k ? '4K' : 'HD'}`);
 
   let id = -1;
   let refreshed = false;
